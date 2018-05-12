@@ -79,7 +79,7 @@ class Generator(chainer.Chain):
             # w = chainer.initializers.HeNormal()  # He initialize value
             self.l0 = L.Linear(
                 in_size=None,
-                out_size=1024
+                out_size=1024,
                 initialW=w,
                 nobias=True)
             self.l1 = L.Linear(
@@ -101,8 +101,7 @@ class Generator(chainer.Chain):
                 ksize=6,
                 stride=2,
                 pad=2,
-                initialW=w,
-                nobias=True)  # (, 1, 28, 28)
+                initialW=w)  # (, 1, 28, 28)
 
             self.bn0 = L.BatchNormalization(
                 1024)
@@ -142,8 +141,9 @@ class Generator(chainer.Chain):
         h = F.leaky_relu(self.bn1(self.l1(h)))
         h = F.reshape(h, (len(z), self.ch, self.bottom_width,
                           self.bottom_width))  # dataformat is NCHW
-        h = F.leaky_relu(self.bn2(self.dc1(h)))
-        h = F.relu(self.bn2(self.dc2(h)))
+        h = F.leaky_relu(self.bn2(self.dc2(h)))
+        x = F.tanh(self.dc3(h))
+
         return x
 
 
@@ -159,4 +159,13 @@ if __name__ == "__main__":
     # print(img)
     g = c.build_computational_graph(logits)
     with open('dis_graph.dot', 'w') as o:
+        o.write(g.dump())
+
+    z = np.empty((1, 100), dtype="f")
+    gen = Generator()
+    fake_image = gen(Variable(z))
+
+    # print(img)
+    g = c.build_computational_graph(fake_image)
+    with open('gen_graph.dot', 'w') as o:
         o.write(g.dump())
