@@ -46,8 +46,8 @@ class DCGANUpdater(chainer.training.StandardUpdater):
         y_fake = self.dis(x_fake)
 
         # update Generatar and Discriminator
-        gen_optimizer.update(self.loss_gen, gen, y_fake)
-        dis_optimizer.update(self.loss_dis, dis, y_fake, y_real)
+        gen_optimizer.update(self.loss_gen, self.gen, y_fake)
+        dis_optimizer.update(self.loss_dis, self.dis, y_fake, y_real)
 
     def loss_dis(self, dis, y_fake, y_real):
         """
